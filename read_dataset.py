@@ -242,7 +242,7 @@ def load_data():
     else:
         print("doesn't exist, reading data")
 
-        Dir = "pretrain20"
+        Dir = "pretrain"
         for subfolder_name in os.listdir(Dir):
             subfolder = os.path.join(Dir, subfolder_name)  # 5588894046 contains kza txt files, kza mp4 files
 
