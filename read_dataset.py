@@ -13,9 +13,11 @@ from numpy import argmax
 from sklearn.preprocessing import OneHotEncoder, LabelEncoder
 from keras.utils import to_categorical
 import mouth_extraction
+from tqdm import tqdm
 import wild_model
 import lipnet_model
 from keras.callbacks import ModelCheckpoint
+from collections import defaultdict, Counter
 
 total_words = []
 total_words_gray = []
@@ -296,7 +298,8 @@ def main(mode):
     global num_of_classes
     global num_of_classes_test
     global maxframes
-
+    word_count_dict = defaultdict(int)
+    most_frequent_classes = defaultdict(int)
     load_data()
 
     ''' ####################################### edit 17/5 ######################################
@@ -339,9 +342,37 @@ def main(mode):
     y_labels_encoded = one_hot_encoder.fit_transform(y_labels_encoded)  # .toarray()
     new_total_words = np.asarray(new_total_words)
     print("Conv3D model:")
-    lipnet_model.training_model(new_total_words, y_labels_encoded,
-                                    num_of_classes, one_hot_encoder,
-                                    y_label_encoder)  # added last parameter
+    # y labels to dictionary
+    for word in y_labels:
+        word_count_dict[word] += 1
+    # y_labels = np.asarray(y_labels)
+    y_labels2 = []
+    new_total_words2 = []
+    classes_count = 0
+    new_total_words2 = np.asarray(new_total_words2)
+    for key, value in word_count_dict.items():
+        if (value >= 40 and value <= 80):
+            classes_count += 1
+            for i in tqdm(range(value)):
+                indx = y_labels.index(key)
+                y_labels2.append(y_labels[indx])
+                new_total_words2 = np.append(new_total_words2, new_total_words[indx])
+                new_total_words2 = np.reshape(new_total_words2, (
+                    -1, new_total_words.shape[1], new_total_words.shape[2], new_total_words.shape[3],
+                    new_total_words.shape[4]))
+                # y_labels.remove(key)
+                # new_total_words = np.delete(new_total_words, indx)
+
+    print(y_labels2)
+    # most_frequent_classes = Counter(word_count_dict)  # hyrg3 list of tuples (el kelma, occurences)
+    print("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
+    # print(most_frequent_classes)
+    # new_total_words = np.asarray(new_total_words)
+    print("new TOTAL WORDS", new_total_words.shape)
+    print("new TOTAL WORDS2222222", new_total_words2.shape)
+    lipnet_model.training_model(new_total_words2, y_labels2,
+                                classes_count, one_hot_encoder,
+                                y_label_encoder)  # added last parameter
 
 
 #      num_of_classes_test = num_of_classes
@@ -385,7 +416,7 @@ def testing(mode):
 
     new_total_words = np.asarray(new_total_words)
     lipnet_model.testing(new_total_words, y_labels_test_encoded, one_hot_encoder,
-                             y_label_encoder, num_of_classes_test)
+                         y_label_encoder, num_of_classes_test)
 
     return
 
