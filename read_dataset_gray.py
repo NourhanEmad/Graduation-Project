@@ -67,7 +67,8 @@ def duplicate_frames():
                 new_wordlist = np.append(new_wordlist,
                                          wordlist[len(wordlist) - 1])  # append last element multiple time
                 # for grey frames
-                new_wordlist = np.reshape(new_wordlist, (-1, wordlist[len(wordlist)-1].shape[0], wordlist[len(wordlist)-1].shape[1]))#for grey frames
+                new_wordlist = np.reshape(new_wordlist, (
+                -1, wordlist[len(wordlist) - 1].shape[0], wordlist[len(wordlist) - 1].shape[1]))  # for grey frames
                 # for coloured frames
                 # new_wordlist = np.reshape(new_wordlist,
                 #                           (-1, wordlist[len(wordlist) - 1].shape[0],
@@ -343,13 +344,12 @@ def main(mode):
     #                                 num_of_classes, one_hot_encoder,
     #                                 y_label_encoder)  # added last parameter
 
+    #      num_of_classes_test = num_of_classes
+    #      testing(mode)
 
-#      num_of_classes_test = num_of_classes
-#      testing(mode)
+    #    print("----------------------")
 
-#    print("----------------------")
-
-#    print("**Wild Model:")
+    #    print("**Wild Model:")
     wild_model.training_model(new_total_words, y_labels_encoded, num_of_classes, one_hot_encoder, y_label_encoder)
 
 
@@ -387,7 +387,7 @@ def testing(mode):
     # lipnet_model.testing(new_total_words, y_labels_test_encoded, one_hot_encoder,
     #                          y_label_encoder, num_of_classes_test)
     wild_model.testing(new_total_words, y_labels_test_encoded, one_hot_encoder,
-                             y_label_encoder, num_of_classes_test)
+                       y_label_encoder, num_of_classes_test)
     return
 
 
