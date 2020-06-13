@@ -6,7 +6,7 @@ from keras.models import load_model
 from keras import optimizers
 from keras_preprocessing.sequence import pad_sequences
 from numpy import argmax
-from sklearn.preprocessing import LabelEncoder
+from sklearn.preprocessing import LabelEncoder, OneHotEncoder
 from keras.utils import to_categorical
 from sklearn.model_selection import train_test_split
 import numpy as np
@@ -64,8 +64,52 @@ def training_model(X_input, Y_output, num_of_classes, one_hot_encoder, le):
     model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
 
     # NEW:
+    # from scipy.sparse import csr_matrix
+    #
+    # X_input = csr_matrix(X_input)
+    # X_input = X_input.toarray()
+
+    # Y_output = np.asarray(Y_output)
     x_train, x_test, y_train, y_test = train_test_split(X_input, Y_output, test_size=0.2, random_state=0,
-                                                        shuffle=True)  # ,stratify=Y_output)
+                                                        shuffle=True, stratify=Y_output)
+
+    ########3
+
+    # classesInvalidationandNotInTrain = 0
+    # setYtest = set()
+    # setYtrain = set()
+    #
+    # for i in range(len(y_test)):
+    #     setYtest.add(y_test[i])
+    #
+    # for i in range(len(y_train)):
+    #     setYtrain.add(y_train[i])
+    #
+    # print("BEFOREsetYtrain", len(y_train))
+    # print("setYtrain", len(setYtrain))
+    # print("setYtest", len(setYtest))
+    # x=len(setYtest)
+    #
+    # # setYtest = np.asarray(setYtest)
+    #
+    # for i in range(x):
+    #     z = setYtest.pop()
+    #     print(z)
+    #     if (z in setYtrain == False):
+    #         classesInvalidationandNotInTrain += 1
+    #
+    # print("classesInvalidationandNotInTrain", classesInvalidationandNotInTrain)
+    ###########3
+    y_labels_encoded = le.fit_transform(y_train)
+    y_labels_encoded = np.reshape(y_labels_encoded, (-1, 1))
+
+    y_train = one_hot_encoder.fit_transform(y_labels_encoded)  # .toarray()
+    ###########
+    y_labels_encoded = le.fit_transform(y_test)
+    y_labels_encoded = np.reshape(y_labels_encoded, (-1, 1))
+
+    y_test = one_hot_encoder.fit_transform(y_labels_encoded)  # .toarray()
+    print("------------BEEEEEEEEEEEEEEEEBB--------------")
 
     # print("shape x_train before validation", x_train.shape)
     # print("shape y_train before validation", y_train.shape)
@@ -82,7 +126,7 @@ def training_model(X_input, Y_output, num_of_classes, one_hot_encoder, le):
     # print("weights loaded")
     checkpoint = ModelCheckpoint(filepath, monitor='val_accuracy', verbose=1, save_best_only=True, mode='max')
     callbacks_list = [checkpoint]
-    history = model.fit(x_train, y_train, shuffle=True, epochs=25, validation_data=(x_test, y_test),
+    history = model.fit(x_train, y_train, shuffle=True, epochs=20, validation_data=(x_test, y_test),
                         batch_size=in_shape[0], verbose=2, callbacks=callbacks_list)
     model.save_weights("lipnet_model_weights.h5")
 
