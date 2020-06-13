@@ -8,38 +8,38 @@ from keras.utils import to_categorical
 from sklearn.model_selection import train_test_split
 
 model = Sequential()
+
+
 def training_model(X_input, Y_output, num_of_classes, one_hot_encoder, le):
     global model
     in_shape = X_input[0].shape
 
     # conv 1
-    model.add(
-        Conv2D(96, kernel_size=3, input_shape=in_shape, strides=(1, 1), activation='relu', padding='same', name="c1"))
+    model.add(Conv2D(32, kernel_size=3, input_shape=in_shape, strides=(1, 1), activation='relu', padding='same', name="c1"))
     model.add(MaxPooling2D(pool_size=(3, 3), strides=(2, 2)))
     model.add(BatchNormalization())
 
     # conv 2
-    model.add(Conv2D(256, kernel_size=3, strides=(2, 2), activation='relu', padding='same', name="c2"))
+    model.add(Conv2D(64, kernel_size=3, strides=(2, 2), activation='relu', padding='same', name="c2"))
     model.add(MaxPooling2D(pool_size=(3, 3), strides=(2, 2)))
     model.add(BatchNormalization())
 
     # conv 3
-    model.add(Conv2D(512, kernel_size=3, strides=(1, 1), activation='relu', padding='same', name="c3"))
-
-    # conv 4
-    model.add(Conv2D(512, kernel_size=3, strides=(1, 1), activation='relu', padding='same', name="c4"))
-
-    # conv 5
-    model.add(Conv2D(512, kernel_size=3, strides=(1, 1), activation='relu', padding='same', name="c5"))
+    model.add(Conv2D(96, kernel_size=3, strides=(1, 1), activation='relu', padding='same', name="c3"))
+    # //mai
     model.add(MaxPooling2D(pool_size=(3, 3), strides=(2, 2)))
+    model.add(BatchNormalization())
+    # //
+    # conv 4
+    # model.add(Conv2D(512, kernel_size=3, strides=(1, 1), activation='relu', padding='same', name="c4"))
+    #
+    # # conv 5
+    # model.add(Conv2D(512, kernel_size=3, strides=(1, 1), activation='relu', padding='same', name="c5"))
+    # model.add(MaxPooling2D(pool_size=(3, 3), strides=(2, 2)))
 
     # FC6
     model.add(TimeDistributed(Flatten()))
-    model.add(Dense(512))
-
-    #####################################################################
-
-    print(model.summary())
+    model.add(Dense(256))
 
     # add LSTM
     model.add(LSTM(256, return_sequences=True))
@@ -48,19 +48,21 @@ def training_model(X_input, Y_output, num_of_classes, one_hot_encoder, le):
 
     # model.add((Dense(128, activation='relu')))
     model.add((Dense(num_of_classes, activation='softmax')))
+    print(model.summary())
 
     sgd = optimizers.SGD(lr=0.1)
-    model.compile(loss='categorical_crossentropy', optimizer=sgd)  # lsa hshof loss eh
+    model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])  # lsa hshof loss eh
 
-    x_train, x_test, y_train, y_test = train_test_split(X_input, Y_output, test_size=0.2, random_state=0,shuffle=True)
+    x_train, x_test, y_train, y_test = train_test_split(X_input, Y_output, test_size=0.2, random_state=0, shuffle=True)
 
-    model.fit(x_train,y_train, epochs=10, batch_size=in_shape[0],shuffle=True, verbose=2,validation_data=(x_test, y_test))
+    model.fit(x_train, y_train, epochs=50, batch_size=in_shape[0], shuffle=True, verbose=2,
+              validation_data=(x_test, y_test))
 
-    result = model.evaluate(X_test, y_test, verbose=1)
-    print("Done testing")
+    # result = model.evaluate(x_test, y_test, verbose=2)
+    # print("Done testing")
 
-    print("Test loss =", result[0])
-    print("Test accuracy =", result[1] * 100)
+    # print("Test loss =", result[0])
+    # print("Test accuracy evaluation=", result * 100)
     model.save_weights("wild_model_weights.h5")
 
     prediction = model.predict(x_test)
